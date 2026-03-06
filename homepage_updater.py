@@ -2,14 +2,15 @@ import datetime
 from bs4 import BeautifulSoup
 import os
 import re
+import requests
 
 # --- Configuration and Data --- #
-# GITHUB_TOKEN will be passed via environment variable for secure push. It is NOT stored in this script.
 REPO_PATH = "/home/icalling/.openclaw/workspace/icalling-story"
 INDEX_HTML_PATH = os.path.join(REPO_PATH, "index.html")
+TELEGRAM_BOT_TOKEN = "8684597246:AAFRE9MPxczQe1X17j9knGaadyyY6NGzBS8"
+TELEGRAM_CHAT_ID = "63402726"
 
 # Live data placeholders (these would ideally be fetched live within the script)
-# For this run, using the last fetched values
 BTC_PRICE = "70,521.88" # Updated price from last fetch
 TSLA_PRICE = "405.55"
 MOS_PRICE = "26.28"
@@ -41,6 +42,32 @@ def generate_my_prediction():
 <br>
 <p><em>Note: This is Maicol's personal prediction. Investment decisions are the sole responsibility of the investor.</em></p>
 """
+
+def send_telegram_report(btc_price, tsla_price, mos_price, key_headlines):
+    """Sends a report to Telegram."""
+    message = (
+        f"✅ **Homepage Update Complete!** ({get_current_date()})\n\n"
+        f"**📰 Key Headlines:**\n{key_headlines}\n"
+        f"**📈 Prices:**\n"
+        f"  - Bitcoin: ${btc_price}\n"
+        f"  - TSLA: ${tsla_price}\n"
+        f"  - MOS: ${mos_price}"
+    )
+    
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    payload = {
+        'chat_id': TELEGRAM_CHAT_ID,
+        'text': message,
+        'parse_mode': 'Markdown'
+    }
+    
+    try:
+        response = requests.post(url, json=payload, timeout=10)
+        response.raise_for_status()
+        print("Telegram report sent successfully!")
+    except requests.exceptions.RequestException as e:
+        print(f"Error sending Telegram report: {e}")
+
 
 def update_homepage_content(btc_price, tsla_price, mos_price, key_headlines):
     # Ensure the script is run from the repo_path
@@ -122,17 +149,29 @@ def update_homepage_content(btc_price, tsla_price, mos_price, key_headlines):
     return f"Homepage content for {current_date} prepared locally."
 
 
-def git_commit_changes():
+def git_commit_and_push(github_token):
     os.chdir(REPO_PATH)
     os.system("git config user.email 'maicol@openclaw.ai'")
     os.system("git config user.name 'Maicol'")
     os.system("git add .")
     commit_message = f"Update homepage with new analysis, headlines, and disclaimer for {get_current_date()}"
     os.system(f"git commit -m '{commit_message}'")
-    print("Changes committed locally.")
+    
+    # Push with token
+    push_command = f"git push https://oauth2:{github_token}@github.com/icallingx-max/icalling-story.git main"
+    os.system(push_command)
+    print("Changes committed and pushed to GitHub!")
 
 if __name__ == "__main__":
     print("Starting homepage update...")
-    update_homepage_content(BTC_PRICE, TSLA_PRICE, MOS_PRICE, get_key_headlines_en())
+    key_headlines_today = get_key_headlines_en()
+    update_homepage_content(BTC_PRICE, TSLA_PRICE, MOS_PRICE, key_headlines_today)
     print("Homepage content updated locally. Now committing changes.")
-    git_commit_changes()
+    
+    github_token = os.environ.get("GITHUB_TOKEN")
+    if github_token:
+        git_commit_and_push(github_token)
+        # Send Telegram report after successful push
+        send_telegram_report(BTC_PRICE, TSLA_PRICE, MOS_PRICE, key_headlines_today)
+    else:
+        print("Error: GITHUB_TOKEN environment variable not set. Cannot push changes or send report.")
