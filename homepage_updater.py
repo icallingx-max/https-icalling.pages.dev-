@@ -153,20 +153,17 @@ def update_homepage_content(btc_price, tsla_price, mos_price, bitcoin_news_summa
     return f"Homepage content for {current_date} prepared locally."
 
 
-def git_commit_and_push():
+def git_commit_changes():
     os.chdir(REPO_PATH)
     os.system("git config user.email 'maicol@openclaw.ai'")
     os.system("git config user.name 'Maicol'")
     os.system("git add .")
     commit_message = f"Update macroeconomic trends and market snapshot for {get_current_date()}"
     os.system(f"git commit -m '{commit_message}'")
-    
-    # The actual push command will be executed by the agent, passing the token via env.
-    # This function only commits locally.
-    print("Changes committed locally. Ready for push.")
+    print("Changes committed locally.")
 
 if __name__ == "__main__":
     print("Starting homepage update...")
     update_homepage_content(BTC_PRICE, TSLA_PRICE, MOS_PRICE, get_bitcoin_news_summary_en())
     print("Homepage content updated locally. Now committing changes.")
-    git_commit_and_push()
+    git_commit_changes()
