@@ -10,7 +10,7 @@ INDEX_HTML_PATH = os.path.join(REPO_PATH, "index.html")
 
 # Live data placeholders (these would ideally be fetched live within the script)
 # For this run, using the last fetched values
-BTC_PRICE = "70,344.91" # Updated price from last fetch
+BTC_PRICE = "70,521.88" # Updated price from last fetch
 TSLA_PRICE = "405.55"
 MOS_PRICE = "26.28"
 
@@ -19,11 +19,11 @@ def get_current_date():
 
 def get_key_headlines_en():
     return """
-*   **The Motley Fool:** How Buying Bitcoin Today Could 10x Your Net Worth.
+*   **The Motley Fool:** 1 Number That Shows Why Bitcoin Will Go Higher in the Long Term.
+*   **CoinDesk:** Bitcoin (BTC) price drops toward $70,000 as Iran war sends oil price higher.
+*   **CoinDesk:** Vancouver Mayor Ken Sim’s BTC reserves proposal blocked by city, provincial law.
 *   **Chosun Ilbo:** Bitcoin Holds Steady Amid Middle East Turmoil.
 *   **Digital Today:** Bitcoin investing in stages (DCA strategy) gains attention again.
-*   **Yahoo Finance:** Stock market rebounds on hopes of Iran de-escalation as bitcoin surges.
-*   **Investing.com:** Bitcoin price falls to $70k amid Iran conflict; set for weekly jump.
 """
 
 def generate_icalling_analysis(btc_price, tsla_price, mos_price):
